@@ -1,0 +1,111 @@
+﻿@using HomeLibraryApp.Helpers
+@model IEnumerable<LibraryItem>
+@{
+	ViewData["Title"] = "Biblioteka";
+}
+
+<div class="container mt-3">
+	<div class="d-flex justify-content-between align-items-center">
+		<h2>@ViewData["Title"]</h2>
+		@if (User.IsInRole("Admin"))
+		{
+			<a asp-action="Create" class="btn btn-primary">Dodaj pozycję</a>
+		}
+	</div>
+	<table id="table"
+	       data-locale="pl-PL"
+	       data-toggle="table"
+	       data-search="true"
+	       data-searchable="true"
+	       data-pagination="true"
+	       data-page-list="[5, 10, 25, 50, 100]"
+		   class="table table-condensed table-striped table-hover">
+		<thead>
+		<tr>
+			<th data-field="title" data-sortable="true">Tytuł</th>
+			<th data-field="type" data-sortable="true">Typ</th>
+			<th data-field="authors" data-sortable="true">Autorzy</th>
+			<th data-field="publishers" data-sortable="true">Wydawcy</th>
+			<th data-field="keywords" data-sortable="true"  data-visible="false"></th>
+			<th>Akcje</th>
+		</tr>
+		</thead>
+		<tbody>
+		@foreach (var item in Model)
+		{
+			<tr>
+				<td>@item.Title</td>
+				@* <td>@Enum.GetName(typeof(LibraryItemType), item.Type)</td> *@
+					<td>@Html.GetDisplayNameForEnum(item.Type)</td>
+				<td>
+					@foreach (var authorLibraryItem in item.AuthorLibraryItems)
+					{
+						<span class="badge bg-secondary">@authorLibraryItem.Author.Name</span>
+					}
+				</td>
+				<td>
+					@foreach (var publisherLibraryItem in item.PublisherLibraryItems)
+					{
+						<span class="badge bg-secondary">@publisherLibraryItem.Publisher.Name</span>
+					}
+				</td>
+				<td>
+					@foreach (var keyword in item.KeywordLibraryItems.Select(x => x.Keyword.Value))
+					{
+						<span class="badge bg-secondary">@keyword</span>
+					}
+				</td>
+				<td>
+					<a asp-action="Details" asp-route-id="@item.Id" class="btn btn-primary">Szczegóły</a>
+					@if (User.IsInRole("Admin"))
+					{
+						<a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-secondary">Edytuj</a>
+						<button type="button" 
+						        class="btn btn-danger" 
+						        data-bs-toggle="modal" 
+						        data-bs-target="#deleteConfirmModal" 
+						        data-item-title="@item.Title"
+						        data-item-id="@item.Id">Usuń</button>
+					}
+				</td>
+			</tr>
+		}
+		</tbody>
+	</table>
+</div>
+
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h1 class="modal-title fs-5" id="exampleModalLabel">Potwierdzenie usunięcia</h1>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				Czy chcesz usunąć pozycję <q><span id="deleteConfirmModalItemTitle"></span></q>?
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nie</button>
+				<a id="deleteConfirmModalItemId" class="btn btn-danger">Tak</a>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	const deleteConfirmModal = document.getElementById('deleteConfirmModal')
+	const myInput = document.getElementById('deleteConfirmModal')
+
+	deleteConfirmModal.addEventListener('shown.bs.modal', function (event) {
+		const button = event.relatedTarget;
+		
+		const itemTitle = button.getAttribute('data-item-title');
+		const itemId = button.getAttribute('data-item-id');
+		
+		document.getElementById('deleteConfirmModalItemTitle').innerText = itemTitle;
+
+		document.getElementById('deleteConfirmModalItemId').setAttribute('href', '/LibraryItems/Delete/' + itemId);
+		
+		deleteConfirmModal.focus();
+	});
+</script>

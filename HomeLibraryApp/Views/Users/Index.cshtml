@@ -1,0 +1,116 @@
+﻿@using Microsoft.AspNetCore.Identity
+@model IEnumerable<User>
+@inject UserManager<User> UserManager
+@inject SignInManager<User> SignInManager
+@{
+	ViewData["Title"] = "Lista użytkowników";
+	var errorMessage = TempData["ErrorMessage"] as string;
+	var successMessage = TempData["SuccessMessage"] as string;
+}
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+	<div class="alert alert-danger alert-dismissible fade show" role="alert">
+		@errorMessage
+		<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+	</div>
+}
+@if (!string.IsNullOrEmpty(successMessage))
+{
+	<div class="alert alert-success alert-dismissible fade show" role="alert">
+		@successMessage
+		<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+	</div>
+}
+<div class="d-flex justify-content-between align-items-center">
+	<h2>@ViewData["Title"]</h2>
+	<a asp-controller="Users" asp-action="Create" class="btn btn-primary">Dodaj użytkownika</a>
+</div>
+
+<table class="table">
+	<thead>
+	<tr>
+		<th>Lp.</th>
+		<th>Email</th>
+		<th>Rola</th>
+		<th>Email potwierdzony</th>
+		<th>Akcje</th>
+	</tr>
+	</thead>
+	<tbody>
+	@{
+		var counter = 1;
+	}
+	@foreach (var user in Model)
+	{
+		<tr>
+			<td>@counter</td>
+			<td>@user.Email</td>
+			<td>
+				@if (await UserManager.IsInRoleAsync(user, "Admin"))
+				{
+					<span class="badge bg-primary">Admin</span>
+				}
+				else
+				{
+					<span class="badge bg-secondary">User</span>
+				}
+			</td>
+			<td>
+				@if (user.EmailConfirmed)
+				{
+					<span class="badge bg-success">Tak</span>
+				}
+				else
+				{
+					<span class="badge bg-danger">Nie</span>
+				}
+				</td>
+			<td>
+				<button type="button" 
+				        class="btn btn-danger" 
+				        data-bs-toggle="modal" 
+				        data-bs-target="#deleteConfirmModal" 
+				        data-item-username="@user.Email"
+				        data-item-id="@user.Id">Usuń</button>
+			</td>
+		</tr>
+		counter++;
+	}
+	</tbody>
+</table>
+
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h1 class="modal-title fs-5" id="exampleModalLabel">Potwierdzenie usunięcia użytkownika</h1>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				Czy chcesz usunąć użytkownika <q><span id="deleteConfirmModalItemUsername"></span></q>?
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nie</button>
+				<a id="deleteConfirmModalItemId" class="btn btn-danger">Tak</a>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	const deleteConfirmModal = document.getElementById('deleteConfirmModal')
+	const myInput = document.getElementById('deleteConfirmModal')
+
+	deleteConfirmModal.addEventListener('shown.bs.modal', function (event) {
+		const button = event.relatedTarget;
+		
+		const itemUsername = button.getAttribute('data-item-username');
+		const itemId = button.getAttribute('data-item-id');
+		
+		document.getElementById('deleteConfirmModalItemUsername').innerText = itemUsername;
+
+		document.getElementById('deleteConfirmModalItemId').setAttribute('href', '/Users/Delete/' + itemId);
+		
+		deleteConfirmModal.focus();
+	});
+</script>

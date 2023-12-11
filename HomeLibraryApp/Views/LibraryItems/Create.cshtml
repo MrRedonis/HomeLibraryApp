@@ -1,0 +1,243 @@
+﻿@using HomeLibraryApp.Enums
+@model HomeLibraryApp.Models.ViewModels.CreateLibraryItemViewModel
+@{
+	ViewData["Title"] = "Dodaj pozycję";
+}
+
+<div class="d-flex justify-content-between align-items-center">
+	<h2>@ViewData["Title"]</h2>
+	<a asp-action="Index" class="btn btn-primary">Powrót</a>
+</div>
+
+<div class="container mt-4">
+	<form asp-action="Create" asp-controller="LibraryItems" method="post" enctype="multipart/form-data">
+		<div class="row mb-3">
+			<div class="col-sm-3">
+				<div class="row g-1 align-items-center">
+					<div class="col-3">
+						<label asp-for="Title" class="form-label h4">Tytuł</label>
+					</div>
+					<div class="col-9">
+						<input asp-for="Title" class="form-control" />
+					</div>
+				</div>
+				<span asp-validation-for="Title" class="text-danger"></span>
+			</div>
+
+			<div class="col-sm-3">
+				<div class="row g-1 align-items-center">
+					<div class="col-3">
+						<label asp-for="Type" class="form-label h4">Typ</label>
+					</div>
+					<div class="col-9">
+						<select asp-for="Type" asp-items="Html.GetEnumSelectList<LibraryItemType>()" class="form-select" id="typeSelect">
+							<option value="" disabled selected>Wybierz typ</option>
+						</select>
+					</div>
+				</div>
+				<span asp-validation-for="Type" class="text-danger"></span>
+			</div>
+
+			<div class="col-sm-6">
+				<div class="row g-1 align-items-center">
+					<div class="col-4">
+						<label asp-for="ImageFile" class="form-label h4">Zdjęcie okładki</label>
+					</div>
+					<div class="col-8">
+						<input asp-for="ImageFile" type="file" class="form-control" />
+					</div>
+				</div>
+				<span asp-validation-for="ImageFile" class="text-danger"></span>
+			</div>
+		</div>
+
+		<div class="mb-3">
+			<label asp-for="Summary" class="form-label h4">Opis</label>
+			<textarea asp-for="Summary" class="form-control" rows="5"></textarea>
+			<span asp-validation-for="Summary" class="text-danger"></span>
+		</div>
+
+		<div class="mb-3">
+			<label asp-for="Authors" class="form-label h4">Autorzy</label>
+			<div id="authors-container">
+				@foreach (var author in Model.Authors)
+				{
+					<div class="input-group mb-3">
+						<input type="text" class="form-control" name="Authors" value="@author"/>
+						<button type="button" class="btn btn-danger remove-author">Usuń</button>
+					</div>
+				}
+			</div>
+			<button type="button" class="btn btn-success" id="add-author">Dodaj autora</button>
+		</div>
+
+		<div class="mb-3">
+			<label asp-for="Publishers" class="form-label h4">Wydawcy</label>
+			<div id="publishers-container">
+				@foreach (var publisher in Model.Publishers)
+				{
+					<div class="input-group mb-3">
+						<input type="text" class="form-control" name="Publishers" value="@publisher"/>
+						<button type="button" class="btn btn-danger remove-publisher">Usuń</button>
+					</div>
+				}
+			</div>
+			<button type="button" class="btn btn-success" id="add-publisher">Dodaj wydawcę</button>
+		</div>
+
+		<div class="mb-3">
+			<label asp-for="Positions" class="form-label h4">Pozycje</label>
+			<div id="positions-container">
+				@if (Model.Positions != null)
+				{
+					foreach (var position in Model.Positions)
+					{
+						<div class="input-group mb-3">
+							<span class="input-group-text readonly">@position.Key</span>
+							<input type="text" class="form-control" name="Positions[@position.Key]" value="@position.Value"/>
+							<button type="button" class="btn btn-danger remove-position">Usuń</button>
+						</div>
+					}
+				}
+			</div>
+			<button type="button" class="btn btn-success" id="add-position">Dodaj pozycję</button>
+		</div>
+
+
+		<div class="mb-3">
+			<label asp-for="Keywords" class="form-label h4">Słowa kluczowe</label>
+			<div id="keywords-container">
+				@foreach (var keyword in Model.Keywords)
+				{
+					<div class="input-group mb-3">
+						<input type="text" class="form-control" name="Keywords" value="@keyword"/>
+						<button type="button" class="btn btn-danger remove-keyword">Usuń</button>
+					</div>
+				}
+			</div>
+			<button type="button" class="btn btn-success" id="add-keyword">Dodaj słowo kluczowe</button>
+		</div>
+		
+		<div class="mb-3">
+			<h4>Dodatkowe atrybuty</h4>
+			
+			<div id="bookFields" style="display: none;">
+				<div class="mb-3">
+					<label asp-for='@Model.Attributes["Numer ISBN"]' class="form-label h5">Numer ISBN</label>
+					<input asp-for='@Model.Attributes["Numer ISBN"]' pattern="^(?=(?:\D*\d){10}(?:(?:\D*\d){3})?$)[\d-]+$" class="form-control" />
+					<span asp-validation-for='@Model.Attributes["Numer ISBN"]' class="text-danger"></span>
+				</div>
+				<div class="mb-3">
+					<label asp-for='@Model.Attributes["Liczba stron"]' class="form-label h5">Liczba stron</label>
+					<input asp-for='@Model.Attributes["Liczba stron"]' pattern="\d*" class="form-control" />
+					<span asp-validation-for='@Model.Attributes["Liczba stron"]' class="text-danger"></span>
+				</div>
+			</div>
+
+			<div id="mediaFields" style="display: none;">
+				<div class="mb-3">
+					<label asp-for='@Model.Attributes["Długość nagrania"]' class="form-label h5">Długość nagrania</label>
+					<input asp-for='@Model.Attributes["Długość nagrania"]' type="time" step="1" class="form-control" />
+					<span asp-validation-for='@Model.Attributes["Długość nagrania"]' class="text-danger"></span>
+				</div>
+			</div>
+
+		</div>
+
+		<button type="submit" class="btn btn-primary">Zapisz</button>
+	</form>
+</div>
+
+@section scripts {
+	<script>
+        $(document).ready(function () {
+            // Przycisk dodawania słów kluczowych
+            $("#add-keyword").click(function () {
+                var newKeywordInput = '<div class="input-group mb-3">' +
+                    '<input type="text" class="form-control" name="Keywords" />' +
+                    '<button type="button" class="btn btn-danger remove-keyword">Usuń</button>' +
+                    '</div>';
+
+                $("#keywords-container").append(newKeywordInput);
+            });
+
+            // Przycisk usuwania słów kluczowych
+            $(document).on("click", ".remove-keyword", function () {
+                $(this).closest(".input-group").remove();
+            });
+
+			$("#add-author").click(function () {
+				var newAuthorInput = '<div class="input-group mb-3">' +
+					'<input type="text" class="form-control" name="Authors" />' +
+					'<button type="button" class="btn btn-danger remove-author">Usuń</button>' +
+					'</div>';
+
+				$("#authors-container").append(newAuthorInput);
+			});
+
+			// Przycisk usuwania słów kluczowych
+			$(document).on("click", ".remove-author", function () {
+				$(this).closest(".input-group").remove();
+			});
+
+			$("#add-publisher").click(function () {
+				var newKeywordInput = '<div class="input-group mb-3">' +
+					'<input type="text" class="form-control" name="Publishers" />' +
+					'<button type="button" class="btn btn-danger remove-publisher">Usuń</button>' +
+					'</div>';
+
+				$("#publishers-container").append(newKeywordInput);
+			});
+
+			// Przycisk usuwania słów kluczowych
+			$(document).on("click", ".remove-publisher", function () {
+				$(this).closest(".input-group").remove();
+			});
+
+			$("#add-position").click(function () {
+				var newPositionKey = $("#positions-container .input-group").length + 1;
+				var newPositionInput = '<div class="input-group mb-3">' +
+					'<span class="input-group-text">' + newPositionKey + '</span>' +
+					'<input type="text" class="form-control" name="Positions[' + newPositionKey + ']" />' +
+					'<button type="button" class="btn btn-danger remove-position">Usuń</button>' +
+					'</div>';
+
+				$("#positions-container").append(newPositionInput);
+			});
+
+			// Przycisk usuwania pozycji
+			$(document).on("click", ".remove-position", function () {
+				$(this).closest(".input-group").remove();
+				updatePositionKeys();
+			});
+
+			// Aktualizacja kluczy pozycji po usunięciu
+			function updatePositionKeys() {
+				$("#positions-container .input-group").each(function (index) {
+					var newPositionKey = index + 1;
+					$(this).find(".input-group-text").text(newPositionKey);
+					$(this).find("input").attr("name", "Positions[" + newPositionKey + "]");
+				});
+			}
+
+			showAttributes();
+
+			function showAttributes() {
+				var selectedType = $("#typeSelect").val();
+
+				$("#bookFields, #mediaFields").hide();
+
+                if (selectedType == 1 || selectedType == 2) {
+                    $("#bookFields").show();
+                } else if (selectedType == 3 || selectedType == 4 || selectedType == 5) {
+                    $("#mediaFields").show();
+                }
+			}
+
+			$("#typeSelect").change(function () {
+				$("#bookFields input, #mediaFields input").val("");
+                showAttributes();
+            });
+        });
+    </script>
+}

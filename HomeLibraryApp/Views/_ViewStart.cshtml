@@ -1,0 +1,11 @@
+﻿@using HomeLibraryApp.Enums
+@{
+	if (User.Identity.IsAuthenticated && Style.Dark.ToString().Equals(Context.Session.GetString("UserStyle")))
+	{
+		Layout = "_LayoutDark";
+	}
+	else
+	{
+		Layout = "_Layout";
+	}
+}

@@ -1,0 +1,24 @@
+﻿@page
+@using HomeLibraryApp.Enums
+@model HomeLibraryApp.Areas.Identity.Pages.Account.Manage.StyleModel
+@{
+	ViewData["Title"] = "Styl";
+	ViewData["ActivePage"] = "Styl";
+}
+
+<h3>@ViewData["Title"]</h3>
+
+<form method="post">
+	<div class="form-group">
+		<label for="styleSelect" class="form-label">Wybierz styl:</label>
+		<select asp-for="Input.Style" asp-items="Html.GetEnumSelectList<Style>()" class="form-select" id="styleSelect">
+		</select>
+	</div>
+	<div class="form-group mt-3">
+		<button type="submit" class="btn btn-primary">Zapisz</button>
+	</div>
+</form>
+
+@section Scripts {
+	<partial name="_ValidationScriptsPartial" />
+}

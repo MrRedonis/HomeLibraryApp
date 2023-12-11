@@ -1,0 +1,158 @@
+﻿@using HomeLibraryApp.Enums
+@model LibraryItem
+@{
+	ViewData["Title"] = "Szczegóły pozycji";
+}
+
+<div class="container mt-3">
+	<div class="row">
+		<div class="col-md-6">
+			<h4>@ViewData["Title"]</h4>
+		</div>
+		<div class="col-md-6 text-md-end">
+			<a asp-action="Index" class="btn btn-primary">Powrót</a>
+			@if (User.IsInRole("Admin"))
+			{
+				<a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-secondary">Edytuj</a>
+			}
+		</div>
+	</div>
+	<hr class="my-4">
+	<div>
+		<div class="row">
+			<div class="col-md-8">
+				<dl class="row">
+					<dt class="col-sm-2">
+						Tytuł
+					</dt>
+					<dd class="col-sm-10">
+						@Html.DisplayFor(model => model.Title)
+					</dd>
+					<dt class="col-sm-2">
+						Typ
+					</dt>
+					<dd class="col-sm-10">
+						@Html.DisplayFor(model => model.Type)
+					</dd>
+					<dt class="col-sm-2">
+						Autorzy
+					</dt>
+					<dd class="col-sm-10">
+						@foreach (var authorLibraryItem in Model.AuthorLibraryItems)
+						{
+							<span class="badge bg-secondary">@authorLibraryItem.Author.Name</span>
+						}
+					</dd>
+					<dt class="col-sm-2">
+						Wydawcy
+					</dt>
+					<dd class="col-sm-10">
+						@foreach (var publisherLibraryItem in Model.PublisherLibraryItems)
+						{
+							<span class="badge bg-secondary">@publisherLibraryItem.Publisher.Name</span>
+						}
+					</dd>
+					<dt class="col-sm-2">
+						Opis
+					</dt>
+					<dd class="col-sm-10">
+						@Html.DisplayFor(model => model.Summary)
+					</dd>
+				</dl>
+			</div>
+			<div class="col-md-4 px-0 d-flex justify-content-center align-items-center">
+				@if (Model.Image != null)
+				{
+					<img src="data:image/jpeg;base64,@Convert.ToBase64String(Model.Image.Content)" class="img-fluid img-thumbnail" alt="Library Item Image" style="width: auto; height: 300px;">
+				}
+			</div>
+		</div>
+		</div>
+	@if (Model.Positions.Any())
+	{
+		<div>
+			@if (Model.Type == LibraryItemType.Book || Model.Type == LibraryItemType.Magazine)
+			{
+				<h4>Spis treści</h4>
+			}
+			else if (Model.Type == LibraryItemType.MusicAlbum)
+			{
+				<h4>Spis utworów</h4>
+			}
+			else
+			{
+				<h4>Pozycje</h4>
+			}
+			
+			<hr/>
+			<table class="table">
+				<thead>
+				<tr>
+					@if (Model.Type == LibraryItemType.Book)
+					{
+						<th>Numer rozdziału</th>
+					}
+					else if (Model.Type == LibraryItemType.MusicAlbum)
+					{
+						<th>Numer utworu</th>
+					}
+					else
+					{
+						<th>Numer pozycji</th>
+					}
+					@if (Model.Type == LibraryItemType.Book)
+					{
+						<th>Tytuł rozdziału</th>
+					}
+					else if (Model.Type == LibraryItemType.MusicAlbum)
+					{
+						<th>Tytuł utworu</th>
+					}
+					else
+					{
+						<th>Nazwa pozycji</th>
+					}
+				</tr>
+				</thead>
+				<tbody>
+				@foreach (var position in Model.Positions.OrderBy(x => x.Number))
+				{
+					<tr>
+						<td>@position.Number</td>
+						<td>@position.Content</td>
+					</tr>
+				}
+				</tbody>
+			</table>
+		</div>
+	}
+	@if (Model.KeywordLibraryItems.Select(x => x.Keyword).Any())
+	{
+		<div>
+			<h4>Słowa kluczowe</h4>
+			<hr />
+			<ul>
+				@foreach (var keyword in Model.KeywordLibraryItems.Select(x => x.Keyword).OrderBy(x => x.Value))
+				{
+					<span class="badge bg-secondary">@keyword.Value</span>
+				}
+			</ul>
+		</div>
+	}
+	@if (Model.AttributeValues.Any())
+	{
+		<div>
+			<h4>Dodatkowe informacje</h4>
+			<hr />
+			<div>
+				@foreach (var attributeValue in Model.AttributeValues)
+				{
+					<dl class="row">
+						<dt class="col-sm-2">@attributeValue.Attribute.Name</dt>
+						<dd class="col-sm-10">@attributeValue.Value</dd>
+					</dl>
+				}
+			</div>
+		</div>
+	}
+</div>
